@@ -1,0 +1,92 @@
+<!--
+https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
+-->
+
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>Data Layer: Simple</title>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <meta name="viewport" content="initial-scale=1.0">
+      <meta charset="utf-8">
+      <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+          height: 100%;
+        }
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script async defer>
+        var map;
+        var locations = [];
+        // var locations = [
+        //   ['Matt Koster', "43.05053314605316", "-87.8982449816419"],
+        //   ['Jackson Park', "42.98854018420708", "-87.96802520751953"],
+        // ];
+
+        $.getJSON( "http://127.0.0.1:5000/getstops", function( data ) {
+          $.each( data, function( key, val ) {
+            locations.push(val)
+            // console.log(val)
+            // locations.push(val);
+            // console.log('Length 1:' + locations.length)
+            // console.log('Here')
+            // console.log('Val: ' + key.val)
+          });
+        });
+
+        console.log(locations);
+
+
+        function initMap() {
+
+
+          // console.log(locations);
+
+          // map = new google.maps.Map(document.getElementById('map'), {
+          //   zoom: 11,
+          //   center: {lat: 43.01, lng: -87.91}
+          // });
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 10,
+          center: new google.maps.LatLng(43.05, -88.05),
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+        var infowindow = new google.maps.InfoWindow();
+
+        var marker, i;
+
+        console.log('Length 2: ' + locations.length);
+
+        // console.log(locations[].length);
+        for (i = 0; i < locations.length; i++) {
+          marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+            map: map
+          });
+
+          google.maps.event.addListener(marker, 'click', (function(marker, i) {
+            return function() {
+              infowindow.setContent(locations[i][0]);
+              infowindow.open(map, marker);
+            }
+          })(marker, i));
+        }
+      }
+      </script>
+      <script async defer async=false
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZjegExYeAVl_3Z_QIeh8M8A8FvCaLiHQ&callback=initMap">
+      </script>
+    </body>
+  </html>
