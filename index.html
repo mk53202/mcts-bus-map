@@ -1,92 +1,173 @@
 <!--
 https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
+https://developers.google.com/maps/documentation/javascript/mysql-to-maps
 -->
 
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title>Data Layer: Simple</title>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-      <meta name="viewport" content="initial-scale=1.0">
-      <meta charset="utf-8">
-      <style>
-        /* Always set the map height explicitly to define the size of the div
-         * element that contains the map. */
-        #map {
-          height: 100%;
+<!DOCTYPE html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>MCTS Greenline Current</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <script>
+      var customLabel = {
+        restaurant: {
+          label: 'R'
+        },
+        bar: {
+          label: 'B'
         }
-        /* Optional: Makes the sample page fill the window. */
-        html, body {
-          height: 100%;
-          margin: 0;
-          padding: 0;
-        }
-      </style>
-    </head>
-    <body>
-      <div id="map"></div>
-      <script async defer>
-        var map;
-        var locations = [];
-        // var locations = [
-        //   ['Matt Koster', "43.05053314605316", "-87.8982449816419"],
-        //   ['Jackson Park', "42.98854018420708", "-87.96802520751953"],
-        // ];
-
-        $.getJSON( "http://127.0.0.1:5000/getstops", function( data ) {
-          $.each( data, function( key, val ) {
-            locations.push(val)
-            // console.log(val)
-            // locations.push(val);
-            // console.log('Length 1:' + locations.length)
-            // console.log('Here')
-            // console.log('Val: ' + key.val)
-          });
-        });
-
-        console.log(locations);
-
+      };
 
         function initMap() {
 
-
-          // console.log(locations);
-
-          // map = new google.maps.Map(document.getElementById('map'), {
-          //   zoom: 11,
-          //   center: {lat: 43.01, lng: -87.91}
-          // });
-
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 10,
-          center: new google.maps.LatLng(43.05, -88.05),
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        });
-
-        var infowindow = new google.maps.InfoWindow();
-
-        var marker, i;
-
-        console.log('Length 2: ' + locations.length);
-
-        // console.log(locations[].length);
-        for (i = 0; i < locations.length; i++) {
-          marker = new google.maps.Marker({
-            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-            map: map
+          var map = new google.maps.Map(document.getElementById('map'), {
+            center: new google.maps.LatLng(43.05, -88.05),
+            zoom: 11
           });
 
-          google.maps.event.addListener(marker, 'click', (function(marker, i) {
-            return function() {
-              infowindow.setContent(locations[i][0]);
-              infowindow.open(map, marker);
-            }
-          })(marker, i));
-        }
+          var infoWindow = new google.maps.InfoWindow;
+
+          downloadUrl('busdata.json', function(data) {
+
+            var json_response = JSON.parse(data.response) // parse string back to JSON
+
+            json_response["vehicle"].forEach(function(vehicle) {
+              var point = new google.maps.LatLng(
+                  vehicle.lat,
+                  vehicle.lon
+              );
+
+              var my_vehicle = vehicle.vid
+              var my_destination = vehicle.des
+              var infowincontent = document.createElement('div');
+
+              var strong = document.createElement('strong');
+              strong.textContent = my_destination
+              infowincontent.appendChild(strong);
+              infowincontent.appendChild(document.createElement('br'));
+              var text = document.createElement('text');
+              text.textContent = my_vehicle // address
+              infowincontent.appendChild(text);
+
+              var marker = new google.maps.Marker({
+                map: map,
+                position: point
+              });
+
+              marker.addListener('click', function() {
+                infoWindow.setContent(infowincontent);
+                infoWindow.open(map, marker);
+                // console.log('Clicked: ' + my_vehicle );
+              });
+            });
+
+            // for( stop in my_stops.vehicle ) {
+            //
+            //   var point = new google.maps.LatLng(
+            //       my_stops.vehicle[stop].lat,
+            //       my_stops.vehicle[stop].lon
+            //   );
+
+              // var icon = customLabel[type] || {};
+
+              // var my_vehicle = my_stops.vehicle[stop].vid
+              // var infowincontent = document.createElement('div');
+              //
+              // var strong = document.createElement('strong');
+              // strong.textContent = my_vehicle
+              // infowincontent.appendChild(strong);
+              // infowincontent.appendChild(document.createElement('br'));
+              //
+              // var text = document.createElement('text');
+              // text.textContent = my_vehicle // address
+              // infowincontent.appendChild(text);
+
+              // var marker = new google.maps.Marker({
+              //   map: map,
+              //   position: point
+              //   // label: icon.label
+              // });
+
+              // marker.addListener('click', function() {
+              //   infoWindow.setContent(infowincontent);
+              //   infoWindow.open(map, marker);
+              //   console.log('Clicked: ' + my_vehicle );
+              // });
+              // console.log(my_stops.vehicle[stop].vid);
+            // }
+
+            // Array.prototype.forEach.call(markers, function(markerElem) {
+            //   var id = markerElem.getAttribute('id');
+            //   var name = markerElem.getAttribute('name');
+            //   var address = markerElem.getAttribute('address');
+            //   var type = markerElem.getAttribute('type');
+            //   var point = new google.maps.LatLng(
+            //       parseFloat(markerElem.getAttribute('lat')),
+            //       parseFloat(markerElem.getAttribute('lng')));
+            //
+            //   var infowincontent = document.createElement('div');
+            //   var strong = document.createElement('strong');
+            //   strong.textContent = name
+            //   infowincontent.appendChild(strong);
+            //   infowincontent.appendChild(document.createElement('br'));
+            //
+            //   var text = document.createElement('text');
+            //   text.textContent = address
+            //   infowincontent.appendChild(text);
+              // var icon = customLabel[type] || {};
+              // var marker = new google.maps.Marker({
+              //   map: map,
+              //   position: point
+              //   // label: icon.label
+              // });
+              // marker.addListener('click', function() {
+              //   infoWindow.setContent(infowincontent);
+              //   infoWindow.open(map, marker);
+              // });
+            // });
+          }); // downloadUrl
+        } //initMap
+
+
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
       }
-      </script>
-      <script async defer async=false
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZjegExYeAVl_3Z_QIeh8M8A8FvCaLiHQ&callback=initMap">
-      </script>
-    </body>
-  </html>
+
+      function doNothing() {}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZjegExYeAVl_3Z_QIeh8M8A8FvCaLiHQ&callback=initMap">
+    </script>
+  </body>
+</html>
