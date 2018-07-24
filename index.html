@@ -39,8 +39,8 @@ https://developers.google.com/maps/documentation/javascript/mysql-to-maps
         function initMap() {
 
           var map = new google.maps.Map(document.getElementById('map'), {
-            center: new google.maps.LatLng(43.05, -88.05),
-            zoom: 11
+            center: new google.maps.LatLng(43.10, -87.89),
+            zoom: 12
           });
 
           var infoWindow = new google.maps.InfoWindow;
@@ -77,76 +77,10 @@ https://developers.google.com/maps/documentation/javascript/mysql-to-maps
                 infoWindow.open(map, marker);
                 // console.log('Clicked: ' + my_vehicle );
               });
-            });
 
-            // for( stop in my_stops.vehicle ) {
-            //
-            //   var point = new google.maps.LatLng(
-            //       my_stops.vehicle[stop].lat,
-            //       my_stops.vehicle[stop].lon
-            //   );
-
-              // var icon = customLabel[type] || {};
-
-              // var my_vehicle = my_stops.vehicle[stop].vid
-              // var infowincontent = document.createElement('div');
-              //
-              // var strong = document.createElement('strong');
-              // strong.textContent = my_vehicle
-              // infowincontent.appendChild(strong);
-              // infowincontent.appendChild(document.createElement('br'));
-              //
-              // var text = document.createElement('text');
-              // text.textContent = my_vehicle // address
-              // infowincontent.appendChild(text);
-
-              // var marker = new google.maps.Marker({
-              //   map: map,
-              //   position: point
-              //   // label: icon.label
-              // });
-
-              // marker.addListener('click', function() {
-              //   infoWindow.setContent(infowincontent);
-              //   infoWindow.open(map, marker);
-              //   console.log('Clicked: ' + my_vehicle );
-              // });
-              // console.log(my_stops.vehicle[stop].vid);
-            // }
-
-            // Array.prototype.forEach.call(markers, function(markerElem) {
-            //   var id = markerElem.getAttribute('id');
-            //   var name = markerElem.getAttribute('name');
-            //   var address = markerElem.getAttribute('address');
-            //   var type = markerElem.getAttribute('type');
-            //   var point = new google.maps.LatLng(
-            //       parseFloat(markerElem.getAttribute('lat')),
-            //       parseFloat(markerElem.getAttribute('lng')));
-            //
-            //   var infowincontent = document.createElement('div');
-            //   var strong = document.createElement('strong');
-            //   strong.textContent = name
-            //   infowincontent.appendChild(strong);
-            //   infowincontent.appendChild(document.createElement('br'));
-            //
-            //   var text = document.createElement('text');
-            //   text.textContent = address
-            //   infowincontent.appendChild(text);
-              // var icon = customLabel[type] || {};
-              // var marker = new google.maps.Marker({
-              //   map: map,
-              //   position: point
-              //   // label: icon.label
-              // });
-              // marker.addListener('click', function() {
-              //   infoWindow.setContent(infowincontent);
-              //   infoWindow.open(map, marker);
-              // });
-            // });
+            }); // json_response
           }); // downloadUrl
         } //initMap
-
-
 
       function downloadUrl(url, callback) {
         var request = window.ActiveXObject ?
