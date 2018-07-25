@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>MCTS Greenline Current</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <script>
+      var customLabel = {
+        restaurant: {
+          label: 'R'
+        },
+        bar: {
+          label: 'B'
+        }
+      };
+
+      var markers = [];
+      var map;
+
+        function initMap() {
+
+          map = new google.maps.Map(document.getElementById('map'), {
+            center: new google.maps.LatLng(43.052955, -87.9003088),
+            zoom: 14
+          });
+
+          var infoWindow = new google.maps.InfoWindow;
+
+          setInterval(function() {
+
+            downloadUrl('http://test.koster.ninja/getvehicles', function(data) {
+
+            setMapOnAll(null);
+            marker = [];
+
+            function setMapOnAll(map) {
+              for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+              }
+            }
+
+            var json_response = JSON.parse(data.response) // parse string back to JSON
+
+            json_response["vehicle"].forEach(function(vehicle) {
+              var point = new google.maps.LatLng(
+                  vehicle.lat,
+                  vehicle.lon
+              );
+
+              var my_vehicle = vehicle.vid
+              var my_destination = vehicle.des
+              var my_route = vehicle.rt
+              var my_timestamp = vehicle.tmstmp
+
+              var infowincontent = document.createElement('div');
+
+              var strong = document.createElement('strong');
+              strong.textContent = my_route + " - " + my_destination
+              infowincontent.appendChild(strong);
+              infowincontent.appendChild(document.createElement('br'));
+
+              var text = document.createElement('text');
+              text.textContent = my_vehicle + " - " + my_timestamp
+              infowincontent.appendChild(text);
+
+              var marker = new google.maps.Marker({
+                map: map,
+                position: point
+              });
+
+              marker.addListener('click', function() {
+                infoWindow.setContent(infowincontent);
+                infoWindow.open(map, marker);
+              });
+
+            }); // json_response
+          }); // downloadUrl
+        }, 5000) // setInterval
+      } //initMap
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+      function doNothing() {}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZjegExYeAVl_3Z_QIeh8M8A8FvCaLiHQ&callback=initMap">
+    </script>
+  </body>
+</html>
+
+<!--
+https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
+https://developers.google.com/maps/documentation/javascript/mysql-to-maps
+
+server {
+  location /getvehicles {
+   proxy_pass http://127.0.0.1:7300/;
+   expires -1;
+   log_not_found off;
+  }
+}
+-->

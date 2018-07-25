@@ -22,77 +22,74 @@
     <div id="map"></div>
 
     <script>
-      var customLabel = {
-        restaurant: {
-          label: 'R'
-        },
-        bar: {
-          label: 'B'
-        }
-      };
 
+      // var customLabel = {
+      //   restaurant: {
+      //     label: 'R'
+      //   },
+      //   bar: {
+      //     label: 'B'
+      //   }
+      // };
+
+      var map;
       var markers = [];
 
-        function initMap() {
+      function initMap() {
+        var myMapCenter = {lat: 43.052955, lng: -87.9003088};
 
-          var map = new google.maps.Map(document.getElementById('map'), {
-            center: new google.maps.LatLng(43.052955, -87.9003088),
-            zoom: 14
-          });
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: myMapCenter
+        });
 
-          var infoWindow = new google.maps.InfoWindow;
+        // var infoWindow = new google.maps.InfoWindow;
 
-          setInterval(function() {
+        setInterval(function() { // Timer Loop
 
-            downloadUrl('/getvehicles', function(data) {
+          clearMarkers()
 
-            setMapOnAll(null);
-            marker = [];
+          // Data Fetch
+          downloadUrl('http://test.koster.ninja/getvehicles', function(data) {
+          var json_response = JSON.parse(data.response) // Transform JSON String to Object
 
-            function setMapOnAll(map) {
-              for (var i = 0; i < markers.length; i++) {
-                markers[i].setMap(map);
-              }
-            }
+          // Data Loop
+          json_response["vehicle"].forEach(function(vehicle) {
 
-            var json_response = JSON.parse(data.response) // parse string back to JSON
+            var marker = {lat: parseFloat(vehicle.lat), lng: parseFloat(vehicle.lon)};
 
-            json_response["vehicle"].forEach(function(vehicle) {
-              var point = new google.maps.LatLng(
-                  vehicle.lat,
-                  vehicle.lon
-              );
+            addMarker(marker)
+            //
+            // marker.addListener('click', function() {
+            //   infoWindow.setContent(infowincontent);
+            //   infoWindow.open(map, marker);
+            // });
 
-              var my_vehicle = vehicle.vid
-              var my_destination = vehicle.des
-              var my_route = vehicle.rt
-              var my_timestamp = vehicle.tmstmp
+          }); // json_response
+        }); // downloadUrl
+      }, 5000) // setInterval
+    } //initMap
 
-              var infowincontent = document.createElement('div');
+    // Adds a marker to the map and push to the array.
+    function addMarker(location) {
+      var marker = new google.maps.Marker({
+        position: location,
+        map: map
+      });
+      markers.push(marker);
+    }
 
-              var strong = document.createElement('strong');
-              strong.textContent = my_route + " - " + my_destination
-              infowincontent.appendChild(strong);
-              infowincontent.appendChild(document.createElement('br'));
+    // Sets the map on all markers in the array.
+    function setMapOnAll(map) {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(map);
+      }
+    }
 
-              var text = document.createElement('text');
-              text.textContent = my_vehicle + " - " + my_timestamp
-              infowincontent.appendChild(text);
-
-              var marker = new google.maps.Marker({
-                map: map,
-                position: point
-              });
-
-              marker.addListener('click', function() {
-                infoWindow.setContent(infowincontent);
-                infoWindow.open(map, marker);
-              });
-
-            }); // json_response
-          }); // downloadUrl
-        }, 5000) // setInterval
-      } //initMap
+    // Removes the markers from the map, but keeps them in the array.
+    function clearMarkers() {
+      setMapOnAll(null);
+    }
 
       function downloadUrl(url, callback) {
         var request = window.ActiveXObject ?
@@ -105,12 +102,12 @@
             callback(request, request.status);
           }
         };
-
         request.open('GET', url, true);
         request.send(null);
       }
 
-      function doNothing() {}
+      function doNothing() {} // Dummy function for State loop
+
     </script>
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZjegExYeAVl_3Z_QIeh8M8A8FvCaLiHQ&callback=initMap">
@@ -121,6 +118,8 @@
 <!--
 https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
 https://developers.google.com/maps/documentation/javascript/mysql-to-maps
+https://developers.google.com/maps/documentation/javascript/examples/marker-remove
+https://www.reddit.com/r/learnjavascript/comments/4bm9a5/google_maps_api_clear_existing_markers_before/
 
 server {
   location /getvehicles {
